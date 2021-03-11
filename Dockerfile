@@ -94,8 +94,8 @@ WORKDIR $HOME
 
 # Make folders
 RUN \
-    chmod a+rwx $RESOURCES_PATH && \
-    mkdir $WORKSPACE_HOME && chmod a+rwx $WORKSPACE_HOME && \
+    mkdir $RESOURCES_PATH chmod a+rwx $RESOURCES_PATH && \
+    chmod a+rwx $WORKSPACE_HOME && \
     mkdir $SSL_RESOURCES_PATH && chmod a+rwx $SSL_RESOURCES_PATH
 
 # Layer cleanup script
