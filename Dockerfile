@@ -1,11 +1,12 @@
+ARG ARCH=
 ARG CUDA=11.0
 ARG UBUNTU_VERSION=18.04
+FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
 ARG CUDNN=8.0.4.30-1
 ARG CUDNN_MAJOR_VERSION=8
 ARG LIB_DIR_PREFIX=x86_64
 ARG LIBNVINFER=7.1.3-1
 ARG LIBNVINFER_MAJOR_VERSION=7
-FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
 
 # Needed for string substitution
 SHELL ["/bin/bash", "-c"]
