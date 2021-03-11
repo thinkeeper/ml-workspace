@@ -94,7 +94,7 @@ WORKDIR $HOME
 
 # Make folders
 RUN \
-    mkdir $RESOURCES_PATH chmod a+rwx $RESOURCES_PATH && \
+    chmod a+rwx $RESOURCES_PATH && \
     chmod a+rwx $WORKSPACE_HOME && \
     mkdir $SSL_RESOURCES_PATH && chmod a+rwx $SSL_RESOURCES_PATH
 
