@@ -363,7 +363,7 @@ RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py38_${COND
     # Update selected packages - install python 3.8.x
     $CONDA_ROOT/bin/conda install -y --update-all python=$PYTHON_VERSION && \
     # Link Conda
-    ln -s $CONDA_ROOT/bin/python /usr/local/bin/python && \
+    ln -sf $CONDA_ROOT/bin/python /usr/local/bin/python && \
     ln -s $CONDA_ROOT/bin/conda /usr/bin/conda && \
     # Update
     $CONDA_ROOT/bin/conda install -y pip && \
