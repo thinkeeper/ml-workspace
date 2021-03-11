@@ -1,4 +1,4 @@
-ARG ARCH=
+ARG ARCH=x86_64
 ARG CUDA=11.0
 ARG UBUNTU_VERSION=18.04
 FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
