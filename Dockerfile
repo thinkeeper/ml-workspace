@@ -61,8 +61,6 @@ ARG TF_PACKAGE=tensorflow-gpu
 ARG TF_PACKAGE_VERSION=2.4.0
 RUN python3 -m pip install --no-cache-dir ${TF_PACKAGE}${TF_PACKAGE_VERSION:+==${TF_PACKAGE_VERSION}}
 
-COPY bashrc /etc/bash.bashrc
-RUN chmod a+rwx /etc/bash.bashrc
 RUN mkdir -p /workspace/tensorflow-tutorials && chmod -R a+rwx /workspace/
 RUN mkdir /.local && chmod a+rwx /.local
 RUN apt-get update && apt-get install -y --no-install-recommends wget git
