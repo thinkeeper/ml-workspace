@@ -1,9 +1,83 @@
-FROM ubuntu:18.04
+ARG CUDA=11.0
+ARG UBUNTU_VERSION=18.04
+ARG CUDNN=8.0.4.30-1
+ARG CUDNN_MAJOR_VERSION=8
+ARG LIB_DIR_PREFIX=x86_64
+ARG LIBNVINFER=7.1.3-1
+ARG LIBNVINFER_MAJOR_VERSION=7
+FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
 
-USER root
+# Needed for string substitution
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cuda-command-line-tools-${CUDA/./-} \
+        libcublas-${CUDA/./-} \
+        cuda-nvrtc-${CUDA/./-} \
+        libcufft-${CUDA/./-} \
+        libcurand-${CUDA/./-} \
+        libcusolver-${CUDA/./-} \
+        libcusparse-${CUDA/./-} \
+        libcudnn8=${CUDNN}+cuda${CUDA} \
+        curl \
+        libcudnn8=${CUDNN}+cuda${CUDA} \
+        libfreetype6-dev \
+        libhdf5-serial-dev \
+        libzmq3-dev \
+        pkg-config \
+        software-properties-common \
+        unzip
+
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+# Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
+# dynamic linker run-time bindings
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
+    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
+    && ldconfig
+
+# See http://bugs.python.org/issue19846
+ENV LANG C.UTF-8
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip
+
+RUN python3 -m pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+RUN python3 -m pip --no-cache-dir install --upgrade \
+    "pip<20.3" \
+    setuptools
+
+# Some TF tools expect a "python" binary
+RUN ln -s $(which python3) /usr/local/bin/python
+
+# Options:
+#   tensorflow
+#   tensorflow-gpu
+#   tf-nightly
+#   tf-nightly-gpu
+# Set --build-arg TF_PACKAGE_VERSION=1.11.0rc0 to install a specific version.
+# Installs the latest version by default.
+ARG TF_PACKAGE=tensorflow-gpu
+ARG TF_PACKAGE_VERSION=2.4.0
+RUN python3 -m pip install --no-cache-dir ${TF_PACKAGE}${TF_PACKAGE_VERSION:+==${TF_PACKAGE_VERSION}}
+
+COPY bashrc /etc/bash.bashrc
+RUN chmod a+rwx /etc/bash.bashrc
+RUN mkdir -p /workspace/tensorflow-tutorials && chmod -R a+rwx /workspace/
+RUN mkdir /.local && chmod a+rwx /.local
+RUN apt-get update && apt-get install -y --no-install-recommends wget git
+WORKDIR /worksapce/tensorflow-tutorials
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/classification.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/overfit_and_underfit.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/regression.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/save_and_load.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification_with_hub.ipynb
 
 ### BASICS ###
 # Technical Environment Variables
+USER root
 ENV \
     SHELL="/bin/bash" \
     HOME="/root"  \
@@ -497,7 +571,7 @@ RUN \
 # Add the defaults from /lib/x86_64-linux-gnu, otherwise lots of no version errors
 # cannot be added above otherwise there are errors in the installation of the gui tools
 # Call order: https://unix.stackexchange.com/questions/367600/what-is-the-order-that-linuxs-dynamic-linker-searches-paths-in
-ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$CONDA_ROOT/lib
+ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$CONDA_ROOT/lib:$LD_LIBRARY_PATH
 
 # Install Web Tools - Offered via Jupyter Tooling Plugin
 
@@ -1143,9 +1217,9 @@ ENV CONFIG_BACKUP_ENABLED="true" \
     MAX_NUM_THREADS="auto"
 
 ### END CONFIGURATION ###
-ARG ARG_BUILD_DATE="unknown"
+ARG ARG_BUILD_DATE="2021/03/12"
 ARG ARG_VCS_REF="unknown"
-ARG ARG_WORKSPACE_VERSION="unknown"
+ARG ARG_WORKSPACE_VERSION="0.0.1"
 ENV WORKSPACE_VERSION=$ARG_WORKSPACE_VERSION
 
 # Overwrite & add Labels
@@ -1164,9 +1238,9 @@ LABEL \
     # Open Container labels: https://github.com/opencontainers/image-spec/blob/master/annotations.md
     "org.opencontainers.image.title"="Machine Learning Workspace" \
     "org.opencontainers.image.description"="All-in-one web-based development environment for machine learning." \
-    "org.opencontainers.image.documentation"="https://github.com/ml-tooling/ml-workspace" \
-    "org.opencontainers.image.url"="https://github.com/ml-tooling/ml-workspace" \
-    "org.opencontainers.image.source"="https://github.com/ml-tooling/ml-workspace" \
+    "org.opencontainers.image.documentation"="https://www.civc.xyz" \
+    "org.opencontainers.image.url"="https://www.civc.xyz" \
+    "org.opencontainers.image.source"="https://www.civc.xyz" \
     # "org.opencontainers.image.licenses"="Apache-2.0" \
     "org.opencontainers.image.version"=$WORKSPACE_VERSION \
     "org.opencontainers.image.vendor"="ML Tooling" \
@@ -1176,9 +1250,9 @@ LABEL \
     # Label Schema Convention (deprecated): http://label-schema.org/rc1/
     "org.label-schema.name"="Machine Learning Workspace" \
     "org.label-schema.description"="All-in-one web-based development environment for machine learning." \
-    "org.label-schema.usage"="https://github.com/ml-tooling/ml-workspace" \
-    "org.label-schema.url"="https://github.com/ml-tooling/ml-workspace" \
-    "org.label-schema.vcs-url"="https://github.com/ml-tooling/ml-workspace" \
+    "org.label-schema.usage"="https://www.civc.xyz" \
+    "org.label-schema.url"="https://www.civc.xyz" \
+    "org.label-schema.vcs-url"="https://www.civc.xyz" \
     "org.label-schema.vendor"="ML Tooling" \
     "org.label-schema.version"=$WORKSPACE_VERSION \
     "org.label-schema.schema-version"="1.0" \
