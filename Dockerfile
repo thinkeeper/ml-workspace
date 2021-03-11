@@ -43,7 +43,6 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip
 
-RUN python3 -m pip set config global.index-url https://mirrors.aliyun.com/pypi/simple/
 RUN python3 -m pip --no-cache-dir install --upgrade \
     "pip<20.3" \
     setuptools
