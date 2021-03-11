@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libcurand-11-0 \
         libcusolver-11-0 \
         libcusparse-11-0 \
-        libcudnn8=${CUDNN}+cuda${CUDA} \
+        libcudnn8=${CUDNN}+cuda11.0 \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
