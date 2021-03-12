@@ -642,9 +642,9 @@ RUN \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
     # Install pytorch - gpu 
-    conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch && \
+    pip install --no-cache-dir torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html && \
     # Install tensorflow 
-    pip install tensorflow-gpu==2.4.0 && \
+    pip install --no-cache-dir tensorflow-gpu==2.4.0 && \
     # libartals == 40MB liblapack-dev == 20 MB
     apt-get install -y --no-install-recommends liblapack-dev libatlas-base-dev libeigen3-dev libblas-dev && \
     # pandoc -> installs libluajit -> problem for openresty
