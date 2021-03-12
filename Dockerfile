@@ -907,7 +907,7 @@ RUN \
 COPY /resources/tools/pycharm.sh /workspace/pycharm.sh
 RUN     chmod a+rwx /workspace/pycharm.sh && \
         /workspace/pycharm.sh && \
-        rm /workspace/pycharm.sh &&
+        rm /workspace/pycharm.sh && \
         fix-permissions.sh /opt/pycharm/ && \
         clean-layer.sh
        
