@@ -62,4 +62,3 @@ if args[build_utils.FLAG_MAKE]:
     )
     if completed_process.returncode > 0:
         build_utils.exit_process(1)
-
