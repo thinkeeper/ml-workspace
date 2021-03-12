@@ -1,6 +1,6 @@
 ARG ARCH
-ARG CUDA=11.0
-ARG UBUNTU_VERSION=18.04
+ARG CUDA=11.1
+ARG UBUNTU_VERSION=20.04
 FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
 ARG CUDNN=8.0.4.30-1
 ARG CUDNN_MAJOR_VERSION=8
@@ -13,13 +13,13 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cuda-command-line-tools-11-0 \
-        libcublas-11-0 \
-        cuda-nvrtc-11-0 \
-        libcufft-11-0 \
-        libcurand-11-0 \
-        libcusolver-11-0 \
-        libcusparse-11-0 \
-        libcudnn8=${CUDNN}+cuda11.0 \
+        libcublas-11-1 \
+        cuda-nvrtc-11-1 \
+        libcufft-11-1 \
+        libcurand-11-1 \
+        libcusolver-11-1 \
+        libcusparse-11-1 \
+        libcudnn8=${CUDNN}+cuda11.1 \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
@@ -43,9 +43,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip
 
-RUN python3 -m pip --no-cache-dir install --upgrade \
-    "pip<20.3" \
-    setuptools
+RUN python3 -m pip --no-cache-dir install --upgrade setuptools
 
 # Some TF tools expect a "python" binary
 RUN ln -s $(which python3) /usr/local/bin/python
@@ -57,21 +55,9 @@ RUN ln -s $(which python3) /usr/local/bin/python
 #   tf-nightly-gpu
 # Set --build-arg TF_PACKAGE_VERSION=1.11.0rc0 to install a specific version.
 # Installs the latest version by default.
-ARG TF_PACKAGE=tensorflow-gpu
-ARG TF_PACKAGE_VERSION=2.4.0
-RUN python3 -m pip install --no-cache-dir ${TF_PACKAGE}${TF_PACKAGE_VERSION:+==${TF_PACKAGE_VERSION}}
-
-RUN mkdir -p /workspace/tensorflow-tutorials && chmod -R a+rwx /workspace/
-RUN mkdir /.local && chmod a+rwx /.local
 RUN apt-get update && apt-get install -y --no-install-recommends wget git
-WORKDIR /worksapce/tensorflow-tutorials
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/classification.ipynb
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/overfit_and_underfit.ipynb
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/regression.ipynb
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/save_and_load.ipynb
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification.ipynb
-RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification_with_hub.ipynb
 
+# The following stuff are workspace specific
 ### BASICS ###
 # Technical Environment Variables
 USER root
@@ -95,8 +81,8 @@ WORKDIR $HOME
 # Make folders
 RUN \
     mkdir -p $RESOURCES_PATH chmod a+rwx $RESOURCES_PATH && \
-    chmod a+rwx $WORKSPACE_HOME && \
-    mkdir $SSL_RESOURCES_PATH && chmod a+rwx $SSL_RESOURCES_PATH
+    mkdir -p $WORKSPACE_HOME chmod a+rwx $WORKSPACE_HOME && \
+    mkdir -p $SSL_RESOURCES_PATH && chmod a+rwx $SSL_RESOURCES_PATH
 
 # Layer cleanup script
 COPY resources/scripts/clean-layer.sh  /usr/bin/clean-layer.sh
@@ -112,8 +98,8 @@ COPY resources/scripts/fix-permissions.sh  /usr/bin/fix-permissions.sh
 RUN \
     apt-get update && \
     apt-get install -y locales && \
-    # install locales-all?
-    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    # add english and chinese support
+    sed -i -e 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale LANG=en_US.UTF-8 && \
@@ -381,8 +367,8 @@ RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py38_${COND
 
 ENV PATH=$CONDA_ROOT/bin:$PATH
 
-# There is nothing added yet to LD_LIBRARY_PATH, so we can overwrite
-ENV LD_LIBRARY_PATH=$CONDA_ROOT/lib
+# add conda root to lib path
+ENV LD_LIBRARY_PATH=$CONDA_ROOT/lib:$LD_LIBRARY_PATH
 
 # Install pyenv to allow dynamic creation of python versions
 RUN git clone https://github.com/pyenv/pyenv.git $RESOURCES_PATH/.pyenv && \
@@ -608,26 +594,10 @@ ENV WORKSPACE_FLAVOR=$ARG_WORKSPACE_FLAVOR
 # Install Visual Studio Code
 COPY resources/tools/vs-code-desktop.sh $RESOURCES_PATH/tools/vs-code-desktop.sh
 RUN \
-    # If minimal flavor - do not install
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        exit 0 ; \
-    fi && \
     /bin/bash $RESOURCES_PATH/tools/vs-code-desktop.sh --install && \
     # Cleanup
     clean-layer.sh
 
-# Install Firefox
-
-COPY resources/tools/firefox.sh $RESOURCES_PATH/tools/firefox.sh
-
-RUN \
-    # If minimal flavor - do not install
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        exit 0 ; \
-    fi && \
-    /bin/bash $RESOURCES_PATH/tools/firefox.sh --install && \
-    # Cleanup
-    clean-layer.sh
 
 ### END GUI TOOLS ###
 
@@ -649,14 +619,8 @@ RUN \
     apt-get update && \
     # upgrade pip
     pip install --upgrade pip && \
-    # If minimal flavor - install
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        # Install nomkl - mkl needs lots of space
-        conda install -y --update-all 'python='$PYTHON_VERSION nomkl ; \
-    else \
-        # Install mkl for faster computations
-        conda install -y --update-all 'python='$PYTHON_VERSION mkl-service mkl ; \
-    fi && \
+    # Install mkl for faster computations
+    conda install -y --update-all 'python='$PYTHON_VERSION mkl-service mkl ; \
     # Install some basics - required to run container
     conda install -y --update-all \
             'python='$PYTHON_VERSION \
@@ -680,16 +644,6 @@ RUN \
     conda config --system --set channel_priority false && \
     # Install minimal pip requirements
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-minimal.txt && \
-    # If minimal flavor - exit here
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        # Remove pandoc - package for markdown conversion - not needed
-        # TODO: conda remove -y --force pandoc && \
-        # Fix permissions
-        fix-permissions.sh $CONDA_ROOT && \
-        # Cleanup
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
     conda install -y --freeze-installed  \
@@ -698,18 +652,12 @@ RUN \
         mkl-include && \
     # Install mkldnn
     conda install -y --freeze-installed -c mingfeima mkldnn && \
-    # Install pytorch - cpu only
-    conda install -y -c pytorch "pytorch==1.7.*" cpuonly && \
+    # Install pytorch - gpu 
+    conda install pytorch torchvision torchaudio -c pytorch \
+    # Install tensorflow 
+    conda install -c anaconda tensorflow-gpu \
     # Install light pip requirements
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-light.txt && \
-    # If light light flavor - exit here
-    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
-        # Fix permissions
-        fix-permissions.sh $CONDA_ROOT && \
-        # Cleanup
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     # libartals == 40MB liblapack-dev == 20 MB
     apt-get install -y --no-install-recommends liblapack-dev libatlas-base-dev libeigen3-dev libblas-dev && \
     # pandoc -> installs libluajit -> problem for openresty
@@ -794,23 +742,11 @@ RUN \
     # TODO moved to configuration files = resources/jupyter/nbconfig Edit notebook config
     # echo '{"nbext_hide_incompat": false}' > $HOME/.jupyter/nbconfig/common.json && \
     cat $HOME/.jupyter/nbconfig/notebook.json | jq '.toc2={"moveMenuLeft": false,"widenNotebook": false,"skip_h1_title": false,"sideBar": true,"number_sections": false,"collapse_to_match_collapsible_headings": true}' > tmp.$$.json && mv tmp.$$.json $HOME/.jupyter/nbconfig/notebook.json && \
-    # If minimal flavor - exit here
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        # Cleanup
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     # TODO: Not installed. Disable Jupyter Server Proxy
     # jupyter nbextension disable jupyter_server_proxy/tree --sys-prefix && \
     # Install jupyter black
     jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --sys-prefix && \
     jupyter nbextension enable jupyter-black-master/jupyter-black --sys-prefix && \
-    # If light flavor - exit here
-    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
-        # Cleanup
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     # Install and activate what if tool 
     pip install witwidget && \
     jupyter nbextension install --py --symlink --sys-prefix witwidget && \
@@ -836,19 +772,10 @@ RUN \
     lab_ext_install='jupyter labextension install -y --debug-log-path=/dev/stdout --log-level=WARN --minimize=False --no-build' && \
     # jupyterlab installed in requirements section
     $lab_ext_install @jupyter-widgets/jupyterlab-manager && \
-    # If minimal flavor - do not install jupyterlab extensions
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        # Final build with minimization
-        jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
-        # Cleanup
-        jupyter lab clean && \
-        jlpm cache clean && \
-        rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     $lab_ext_install @jupyterlab/toc && \
     $lab_ext_install jupyterlab_tensorboard && \
+    # install vim extension
+    $lab_ext_install @axlair/jupyterlab_vim && \
     # install jupyterlab git
     $lab_ext_install @jupyterlab/git && \
     pip install jupyterlab-git && \
@@ -856,16 +783,6 @@ RUN \
     # For Matplotlib: https://github.com/matplotlib/jupyter-matplotlib
     #$lab_ext_install jupyter-matplotlib && \
     # Do not install any other jupyterlab extensions
-    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
-        # Final build with minimization
-        jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
-        # Cleanup
-        jupyter lab clean && \
-        jlpm cache clean && \
-        rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
-        clean-layer.sh && \
-        exit 0 ; \
-    fi && \
     # Install jupyterlab language server support
     # TODO update versions for jupyterlab 3.0 release
     pip install jupyter-lsp==0.9.3 && \
@@ -923,6 +840,7 @@ RUN \
     # Cleanup
     clean-layer.sh
 
+
 ### VSCODE ###
 
 # Install vscode extension
@@ -930,10 +848,6 @@ RUN \
 # Alternative install: /usr/local/bin/code-server --user-data-dir=$HOME/.config/Code/ --extensions-dir=$HOME/.vscode/extensions/ --install-extension ms-python-release && \
 RUN \
     SLEEP_TIMER=25 && \
-    # If minimal flavor -> exit here
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
-        exit 0 ; \
-    fi && \
     cd $RESOURCES_PATH && \
     mkdir -p $HOME/.vscode/extensions/ && \
     # Install python extension - (newer versions are 30MB bigger)
@@ -952,10 +866,6 @@ RUN \
     rm redhat.java-$VS_JAVA_VERSION.vsix && \
     mv extension $HOME/.vscode/extensions/redhat.java-$VS_JAVA_VERSION && \
     # && code-server --install-extension redhat.java@$VS_JAVA_VERSION \
-    # If light flavor -> exit here
-    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
-        exit 0 ; \
-    fi && \
     # Install prettie: https://github.com/prettier/prettier-vscode/releases
     PRETTIER_VERSION="5.8.0" && \
     wget --no-verbose https://github.com/prettier/prettier-vscode/releases/download/v$PRETTIER_VERSION/prettier-vscode-$PRETTIER_VERSION.vsix && \
@@ -992,6 +902,15 @@ RUN \
 
 ### END VSCODE ###
 
+### Pycharm 
+
+COPY /resources/tools/pycharm.sh /workspace/pycharm.sh
+RUN     chmod a+rwx /workspace/pycharm.sh && \
+        /workspace/pycharm.sh && \
+        rm /workspace/pycharm.sh &&
+        fix-permissions.sh /opt/pycharm/ &&
+        clean-layer.sh
+       
 ### INCUBATION ZONE ###
 
 RUN \
@@ -1017,12 +936,6 @@ RUN \
     # apt-get install -y libproj-dev && \
     # mysql server: 150MB
     # apt-get install -y mysql-server && \
-    # If minimal or light flavor -> exit here
-    if [ "$WORKSPACE_FLAVOR" = "minimal" ] || [ "$WORKSPACE_FLAVOR" = "light" ]; then \
-        # Cleanup
-        clean-layer.sh  && \
-        exit 0 ; \
-    fi && \
     # Install fkill-cli program  TODO: 30MB, remove?
     npm install --global fkill-cli && \
     # Activate pretty-errors
@@ -1213,15 +1126,24 @@ ENV CONFIG_BACKUP_ENABLED="true" \
     # this can be problematic since docker restricts CPUs by stil showing all
     MAX_NUM_THREADS="auto"
 
-### END CONFIGURATION ###
-ARG ARG_BUILD_DATE="2021/03/12"
-ARG ARG_VCS_REF="unknown"
-ARG ARG_WORKSPACE_VERSION="0.0.1"
-ENV WORKSPACE_VERSION=$ARG_WORKSPACE_VERSION
+
+# add .local
+RUN mkdir -p /.local && chmod a+rwx /.local
+
+### Add tutorials ###
+RUN mkdir -p /workspace/tensorflow-tutorials && chmod -R a+rwx /workspace/
+WORKDIR /worksapce/tensorflow-tutorials
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/classification.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/overfit_and_underfit.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/regression.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/save_and_load.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification.ipynb
+RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification_with_hub.ipynb
+
 
 # Overwrite & add Labels
 LABEL \
-    "maintainer"="mltooling.team@gmail.com" \
+    "maintainer"="gccxeon@gmail.com" \
     "workspace.version"=$WORKSPACE_VERSION \
     "workspace.flavor"=$WORKSPACE_FLAVOR \
     # Kubernetes Labels
