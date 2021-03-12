@@ -11,6 +11,7 @@ ARG LIBNVINFER_MAJOR_VERSION=7
 
 # Needed for string substitution
 SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND="noninteractive" TZ="Asia/Shanghai"
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cuda-command-line-tools-11-0 \
@@ -107,8 +108,7 @@ RUN \
     # Cleanup
     clean-layer.sh
 
-ENV LC_ALL="en_US.UTF-8" \
-    LANG="en_US.UTF-8" \
+ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US:en"
 
 # Install basics
