@@ -722,7 +722,7 @@ RUN \
     jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --sys-prefix && \
     jupyter nbextension enable jupyter-black-master/jupyter-black --sys-prefix && \
     # Install and activate what if tool 
-    pip install witwidget && \
+    pip install qgrid witwidget && \
     jupyter nbextension install --py --symlink --sys-prefix witwidget && \
     jupyter nbextension enable --py --sys-prefix witwidget && \
     # Activate qgrid
