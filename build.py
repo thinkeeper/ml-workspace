@@ -8,7 +8,6 @@ from universal_build.helpers import build_docker
 
 REMOTE_IMAGE_PREFIX = "civc/"
 COMPONENT_NAME = "ml-workspace"
-FLAG_FLAVOR = "flavor"
 
 parser = argparse.ArgumentParser(add_help=False)
 
@@ -20,10 +19,6 @@ docker_image_prefix = args.get(build_docker.FLAG_DOCKER_IMAGE_PREFIX)
 if not docker_image_prefix:
     docker_image_prefix = REMOTE_IMAGE_PREFIX
 
-if not args.get(FLAG_FLAVOR):
-    args[FLAG_FLAVOR] = "all"
-
-flavor = str(args[FLAG_FLAVOR]).lower().strip()
 build_utils.build(".", args)
 
 docker_image_name = COMPONENT_NAME
