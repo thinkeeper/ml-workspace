@@ -650,7 +650,7 @@ RUN \
     # Install pytorch - gpu 
     conda install pytorch torchvision torchaudio cudatoolkit=11.0 -c pytorch && \
     # Install tensorflow 
-    conda install -c anaconda tensorflow-gpu && \
+    pip install tensorflow-gpu==2.4.0 && \
     # Install light pip requirements
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-light.txt && \
     # libartals == 40MB liblapack-dev == 20 MB
@@ -675,9 +675,6 @@ RUN \
     # Add snakemake for workflow management
     conda install -y -c bioconda -c conda-forge snakemake-minimal && \
     # Add mamba as conda alternativ
-    conda install -y -c conda-forge mamba && \
-    # Faiss - A library for efficient similarity search and clustering of dense vectors.
-    conda install -y --freeze-installed faiss-cpu && \
     # Install full pip requirements
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-full.txt && \
     # Setup Spacy
