@@ -1115,6 +1115,17 @@ RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutori
 RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification.ipynb
 RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutorials/keras/text_classification_with_hub.ipynb
 
+ARG CUDA=cu111
+ARG TORCH=1.8.0
+### Install torch
+RUN pip install torch torchvision torchaudio 
+
+### Install torch_geometric
+RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html && \
+RUN pip --no-cache-dir install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html   && \
+RUN pip --no-cache-dir install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \ 
+RUN pip --no-cache-dir install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \
+RUN pip --no-cache-dir install torch-geometric
 
 # Overwrite & add Labels
 LABEL \
@@ -1159,6 +1170,7 @@ LABEL \
 # So that they do not lose their data if they delete the container.
 # TODO: VOLUME [ "/workspace" ]
 WORKDIR /workspace
+
 
 # use global option with tini to kill full process groups: https://github.com/krallin/tini#process-group-killing
 ENTRYPOINT ["/tini", "-g", "--"]
