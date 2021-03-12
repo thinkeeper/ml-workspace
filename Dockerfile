@@ -657,13 +657,11 @@ RUN \
     pip install --no-cache-dir tesserocr && \
     # TODO: installs tenserflow 2.4 - Required for tensorflow graphics (9MB)
     apt-get install -y --no-install-recommends libopenexr-dev && \
-    #pip install --no-cache-dir tensorflow-graphics==2020.5.20 && \
+    pip install --no-cache-dir tensorflow-graphics && \
     # GCC OpenMP (GOMP) support library
     apt-get install -y --no-install-recommends libgomp1 && \
     # Install libjpeg turbo for speedup in image processing
     conda install -y --freeze-installed libjpeg-turbo && \
-    # Spacy - download and large language removal
-    python -m spacy download en && \
     # Fix permissions
     fix-permissions.sh $CONDA_ROOT && \
     # Cleanup
