@@ -913,6 +913,7 @@ RUN \
     # Install fkill-cli program  TODO: 30MB, remove?
     npm install --global fkill-cli && \
     # Activate pretty-errors
+    pip install --no-cache-dir pretty_errors && \
     python -m pretty_errors -u -p && \
     # Cleanup
     clean-layer.sh
