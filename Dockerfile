@@ -1118,14 +1118,14 @@ RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutori
 ARG CUDA=cu111
 ARG TORCH=1.8.0
 ### Install torch
-RUN pip install torch torchvision torchaudio 
+RUN pip install torch=1.8.0 torchvision torchaudio 
 
 ### Install torch_geometric
 RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html && \
-RUN pip --no-cache-dir install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html   && \
-RUN pip --no-cache-dir install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \ 
-RUN pip --no-cache-dir install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \
-RUN pip --no-cache-dir install torch-geometric
+    pip --no-cache-dir install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html   && \
+    pip --no-cache-dir install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \ 
+    pip --no-cache-dir install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \
+    pip --no-cache-dir install torch-geometric
 
 # Overwrite & add Labels
 LABEL \
