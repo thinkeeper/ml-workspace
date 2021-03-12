@@ -50,13 +50,6 @@ RUN python3 -m pip --no-cache-dir install --upgrade setuptools
 # Some TF tools expect a "python" binary
 RUN ln -s $(which python3) /usr/local/bin/python
 
-# Options:
-#   tensorflow
-#   tensorflow-gpu
-#   tf-nightly
-#   tf-nightly-gpu
-# Set --build-arg TF_PACKAGE_VERSION=1.11.0rc0 to install a specific version.
-# Installs the latest version by default.
 RUN apt-get update && apt-get install -y --no-install-recommends wget git
 
 # The following stuff are workspace specific
@@ -655,7 +648,7 @@ RUN \
     # Install mkldnn
     conda install -y --freeze-installed -c mingfeima mkldnn && \
     # Install pytorch - gpu 
-    conda install pytorch torchvision torchaudio -c pytorch && \
+    conda install pytorch torchvision torchaudio cudatoolkit=11.0 -c pytorch && \
     # Install tensorflow 
     conda install -c anaconda tensorflow-gpu && \
     # Install light pip requirements
