@@ -1,8 +1,9 @@
 ARG ARCH
-ARG CUDA=11.1
+ARG CUDA=11.0
+ARG CUDAREF=11-0
 ARG UBUNTU_VERSION=20.04
 FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
-ARG CUDNN=8.1.1.33-1
+ARG CUDNN=8.0.4.30-1
 ARG CUDNN_MAJOR_VERSION=8
 ARG LIB_DIR_PREFIX=x86_64
 ARG LIBNVINFER=7.1.3-1
@@ -12,14 +13,14 @@ ARG LIBNVINFER_MAJOR_VERSION=7
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
-        cuda-command-line-tools-11-1 \
-        libcublas-11-1 \
-        cuda-nvrtc-11-1 \
-        libcufft-11-1 \
-        libcurand-11-1 \
-        libcusolver-11-1 \
-        libcusparse-11-1 \
-        libcudnn8=${CUDNN}+cuda11.2 \
+        cuda-command-line-tools-$CUDAREF \
+        libcublas-$CUDAREF \
+        cuda-nvrtc-$CUDAREF \
+        libcufft-$CUDAREF \
+        libcurand-$CUDAREF \
+        libcusolver-$CUDAREF \
+        libcusparse-$CUDAREF \
+        libcudnn8=${CUDNN}+cuda${CUDA} \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
@@ -36,6 +37,26 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
     && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
     && ldconfig
 
+# See http://bugs.python.org/issue19846
+ENV LANG C.UTF-8
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip
+
+RUN python3 -m pip --no-cache-dir install --upgrade setuptools
+
+# Some TF tools expect a "python" binary
+RUN ln -s $(which python3) /usr/local/bin/python
+
+# Options:
+#   tensorflow
+#   tensorflow-gpu
+#   tf-nightly
+#   tf-nightly-gpu
+# Set --build-arg TF_PACKAGE_VERSION=1.11.0rc0 to install a specific version.
+# Installs the latest version by default.
+RUN apt-get update && apt-get install -y --no-install-recommends wget git
 
 # The following stuff are workspace specific
 ### BASICS ###
