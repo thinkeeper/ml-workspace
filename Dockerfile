@@ -641,18 +641,10 @@ RUN \
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-minimal.txt && \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
-    conda install -y --freeze-installed  \
-        'python='$PYTHON_VERSION \
-        boost \
-        mkl-include && \
-    # Install mkldnn
-    conda install -y --freeze-installed -c mingfeima mkldnn && \
     # Install pytorch - gpu 
-    conda install pytorch torchvision torchaudio cudatoolkit=11.0 -c pytorch && \
+    conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch && \
     # Install tensorflow 
     pip install tensorflow-gpu==2.4.0 && \
-    # Install light pip requirements
-    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-light.txt && \
     # libartals == 40MB liblapack-dev == 20 MB
     apt-get install -y --no-install-recommends liblapack-dev libatlas-base-dev libeigen3-dev libblas-dev && \
     # pandoc -> installs libluajit -> problem for openresty
@@ -668,16 +660,8 @@ RUN \
     #pip install --no-cache-dir tensorflow-graphics==2020.5.20 && \
     # GCC OpenMP (GOMP) support library
     apt-get install -y --no-install-recommends libgomp1 && \
-    # Install Intel(R) Compiler Runtime - numba optimization
-    # TODO: don't install, results in memory error: conda install -y --freeze-installed -c numba icc_rt && \
     # Install libjpeg turbo for speedup in image processing
     conda install -y --freeze-installed libjpeg-turbo && \
-    # Add snakemake for workflow management
-    conda install -y -c bioconda -c conda-forge snakemake-minimal && \
-    # Add mamba as conda alternativ
-    # Install full pip requirements
-    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-full.txt && \
-    # Setup Spacy
     # Spacy - download and large language removal
     python -m spacy download en && \
     # Fix permissions
