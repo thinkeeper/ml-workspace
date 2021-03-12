@@ -101,7 +101,7 @@ RUN \
     apt-get update && \
     apt-get install -y locales && \
     # add english and chinese support
-    sed -i -e 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -ie 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale LANG=en_US.UTF-8 && \
