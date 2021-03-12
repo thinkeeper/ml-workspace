@@ -6,16 +6,11 @@ import docker
 from universal_build import build_utils
 from universal_build.helpers import build_docker
 
-REMOTE_IMAGE_PREFIX = "mltooling/"
+REMOTE_IMAGE_PREFIX = "civc/"
 COMPONENT_NAME = "ml-workspace"
 FLAG_FLAVOR = "flavor"
 
 parser = argparse.ArgumentParser(add_help=False)
-parser.add_argument(
-    "--" + FLAG_FLAVOR,
-    help="Flavor (full, light, minimal) used for docker container",
-    default="minimal",
-)
 
 args = build_utils.parse_arguments(argument_parser=parser)
 
@@ -29,29 +24,9 @@ if not args.get(FLAG_FLAVOR):
     args[FLAG_FLAVOR] = "all"
 
 flavor = str(args[FLAG_FLAVOR]).lower().strip()
-
-if flavor == "all":
-    args[FLAG_FLAVOR] = "minimal"
-    build_utils.build(".", args)
-
-    args[FLAG_FLAVOR] = "light"
-    build_utils.build(".", args)
-
-    args[FLAG_FLAVOR] = "full"
-    build_utils.build(".", args)
-
-    build_utils.exit_process(0)
-
-# unknown flavor -> try to build from subdirectory
-if flavor not in ["full", "minimal", "light"]:
-    # assume that flavor has its own directory with build.py
-    build_utils.build(flavor + "-flavor", args)
-    build_utils.exit_process(0)
+build_utils.build(".", args)
 
 docker_image_name = COMPONENT_NAME
-# Build full image without suffix if the flavor is not minimal or light
-if flavor in ["minimal", "light"]:
-    docker_image_name += "-" + flavor
 
 # docker build
 git_rev = "unknown"
