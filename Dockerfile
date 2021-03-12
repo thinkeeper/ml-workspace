@@ -1,6 +1,5 @@
 ARG ARCH
-ARG CUDA=11.0
-ARG CUDAREF=11-0
+ARG CUDA=11.1
 ARG UBUNTU_VERSION=18.04
 FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
 ARG CUDNN=8.0.4.30-1
@@ -14,14 +13,14 @@ SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Asia/Shanghai"
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
-        cuda-command-line-tools-11-0 \
-        libcublas-11-0 \
-        cuda-nvrtc-11-0 \
-        libcufft-11-0 \
-        libcurand-11-0 \
-        libcusolver-11-0 \
-        libcusparse-11-0 \
-        libcudnn8=${CUDNN}+cuda11.0 \
+        cuda-command-line-tools-11-1 \
+        libcublas-11-1 \
+        cuda-nvrtc-11-1 \
+        libcufft-11-1 \
+        libcurand-11-1 \
+        libcusolver-11-1 \
+        libcusparse-11-1 \
+        libcudnn8=${CUDNN}+cuda11.1 \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
@@ -642,7 +641,7 @@ RUN \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
     # Install pytorch - gpu 
-    pip install --no-cache-dir torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html && \
     # Install tensorflow 
     pip install --no-cache-dir tensorflow-gpu==2.4.0 && \
     # libartals == 40MB liblapack-dev == 20 MB
@@ -1117,9 +1116,6 @@ RUN wget https://raw.githubusercontent.com/tensorflow/docs/master/site/en/tutori
 
 ARG CUDA=cu111
 ARG TORCH=1.8.0
-### Install torch
-RUN pip install torch==1.8.0 torchvision torchaudio 
-
 ### Install torch_geometric
 RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html && \
     pip --no-cache-dir install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html   && \
