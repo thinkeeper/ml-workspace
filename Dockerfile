@@ -1158,7 +1158,7 @@ LABEL \
 # This assures we have a volume mounted even if the user forgot to do bind mount.
 # So that they do not lose their data if they delete the container.
 # TODO: VOLUME [ "/workspace" ]
-# TODO: WORKDIR /workspace?
+WORKDIR /workspace
 
 # use global option with tini to kill full process groups: https://github.com/krallin/tini#process-group-killing
 ENTRYPOINT ["/tini", "-g", "--"]
