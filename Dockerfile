@@ -655,9 +655,9 @@ RUN \
     # Install mkldnn
     conda install -y --freeze-installed -c mingfeima mkldnn && \
     # Install pytorch - gpu 
-    conda install pytorch torchvision torchaudio -c pytorch \
+    conda install pytorch torchvision torchaudio -c pytorch && \
     # Install tensorflow 
-    conda install -c anaconda tensorflow-gpu \
+    conda install -c anaconda tensorflow-gpu && \
     # Install light pip requirements
     pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-light.txt && \
     # libartals == 40MB liblapack-dev == 20 MB
