@@ -13,14 +13,14 @@ ARG LIBNVINFER_MAJOR_VERSION=7
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
-        cuda-command-line-tools-"$CUDAREF" \
-        libcublas-"$CUDAREF" \
-        cuda-nvrtc-"$CUDAREF" \
-        libcufft-"$CUDAREF" \
-        libcurand-"$CUDAREF" \
-        libcusolver-"$CUDAREF" \
-        libcusparse-"$CUDAREF" \
-        libcudnn8=${CUDNN}+cuda${CUDA} \
+        cuda-command-line-tools-11-0 \
+        libcublas-11-0 \
+        cuda-nvrtc-11-0 \
+        libcufft-11-0 \
+        libcurand-11-0 \
+        libcusolver-11-0 \
+        libcusparse-11-0 \
+        libcudnn8=${CUDNN}+cuda11.0 \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
