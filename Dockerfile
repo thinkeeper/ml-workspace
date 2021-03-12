@@ -3,7 +3,7 @@ ARG CUDA=11.0
 ARG CUDAREF=11-0
 ARG UBUNTU_VERSION=20.04
 FROM nvidia/cuda${ARCH:+-$ARCH}:${CUDA}-base-ubuntu${UBUNTU_VERSION} as base
-ARG CUDNN=8.0.4.30-1
+ARG CUDNN=8.1.1.33-1
 ARG CUDNN_MAJOR_VERSION=8
 ARG LIB_DIR_PREFIX=x86_64
 ARG LIBNVINFER=7.1.3-1
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libcurand-11-0 \
         libcusolver-11-0 \
         libcusparse-11-0 \
-        libcudnn8=${CUDNN}+cuda11.0 \
+        libcudnn8=${CUDNN}+cuda11.2 \
         curl \
         libfreetype6-dev \
         libhdf5-serial-dev \
