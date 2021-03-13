@@ -1,1 +1,1 @@
-sudo sh <(curl -sL https://get.docker.com)
+bash <(curl -sL https://get.docker.com)

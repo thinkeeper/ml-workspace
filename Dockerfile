@@ -292,7 +292,7 @@ RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py38_${COND
     # Update selected packages - install python 3.8.x
     $CONDA_ROOT/bin/conda install -y --update-all python=$PYTHON_VERSION && \
     # Link Conda
-    rm /usr/local/bin/python && \
+    rm -f /usr/local/bin/python && \
     ln -s $CONDA_ROOT/bin/python /usr/local/bin/python && \
     ln -s $CONDA_ROOT/bin/conda /usr/bin/conda && \
     # Update
@@ -564,6 +564,14 @@ RUN \
     apt-get update && \
     # upgrade pip
     pip install --upgrade pip && \
+    # If minimal flavor - install
+    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
+        # Install nomkl - mkl needs lots of space
+        conda install -y --update-all 'python='$PYTHON_VERSION nomkl ; \
+    else \
+        # Install mkl for faster computations
+        conda install -y --update-all 'python='$PYTHON_VERSION mkl-service mkl ; \
+    fi && \
     # Install some basics - required to run container
     conda install -y --update-all \
             'python='$PYTHON_VERSION \
@@ -585,8 +593,38 @@ RUN \
             # installed via apt-get: zlib  && \
     # Switch of channel priority, makes some trouble
     conda config --system --set channel_priority false && \
+    # Install minimal pip requirements
+    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-minimal.txt && \
+    # If minimal flavor - exit here
+    if [ "$WORKSPACE_FLAVOR" = "minimal" ]; then \
+        # Remove pandoc - package for markdown conversion - not needed
+        # TODO: conda remove -y --force pandoc && \
+        # Fix permissions
+        fix-permissions.sh $CONDA_ROOT && \
+        # Cleanup
+        clean-layer.sh && \
+        exit 0 ; \
+    fi && \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
+    conda install -y --freeze-installed  \
+        'python='$PYTHON_VERSION \
+        boost \
+        mkl-include && \
+    # Install mkldnn
+    conda install -y --freeze-installed -c mingfeima mkldnn && \
+    # Install pytorch - cpu only
+    conda install -y -c pytorch "pytorch==1.7.*" cpuonly && \
+    # Install light pip requirements
+    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-light.txt && \
+    # If light light flavor - exit here
+    if [ "$WORKSPACE_FLAVOR" = "light" ]; then \
+        # Fix permissions
+        fix-permissions.sh $CONDA_ROOT && \
+        # Cleanup
+        clean-layer.sh && \
+        exit 0 ; \
+    fi && \
     # libartals == 40MB liblapack-dev == 20 MB
     apt-get install -y --no-install-recommends liblapack-dev libatlas-base-dev libeigen3-dev libblas-dev && \
     # pandoc -> installs libluajit -> problem for openresty
@@ -599,16 +637,28 @@ RUN \
     pip install --no-cache-dir tesserocr && \
     # TODO: installs tenserflow 2.4 - Required for tensorflow graphics (9MB)
     apt-get install -y --no-install-recommends libopenexr-dev && \
-    pip install --no-cache-dir tensorflow-graphics && \
+    #pip install --no-cache-dir tensorflow-graphics==2020.5.20 && \
     # GCC OpenMP (GOMP) support library
     apt-get install -y --no-install-recommends libgomp1 && \
+    # Install Intel(R) Compiler Runtime - numba optimization
+    # TODO: don't install, results in memory error: conda install -y --freeze-installed -c numba icc_rt && \
     # Install libjpeg turbo for speedup in image processing
     conda install -y --freeze-installed libjpeg-turbo && \
+    # Add snakemake for workflow management
+    conda install -y -c bioconda -c conda-forge snakemake-minimal && \
+    # Add mamba as conda alternativ
+    conda install -y -c conda-forge mamba && \
+    # Faiss - A library for efficient similarity search and clustering of dense vectors.
+    conda install -y --freeze-installed faiss-cpu && \
+    # Install full pip requirements
+    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements-full.txt && \
+    # Setup Spacy
+    # Spacy - download and large language removal
+    python -m spacy download en && \
     # Fix permissions
     fix-permissions.sh $CONDA_ROOT && \
     # Cleanup
     clean-layer.sh
-
 
 
 # Fix conda version
