@@ -584,7 +584,7 @@ RUN \
     # Switch of channel priority, makes some trouble
     conda config --system --set channel_priority false && \
     # Install minimal pip requirements
-    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements.txt && \
+    # pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements.txt && \
     # OpenMPI support
     apt-get install -y --no-install-recommends libopenmpi-dev openmpi-bin && \
     # libartals == 40MB liblapack-dev == 20 MB

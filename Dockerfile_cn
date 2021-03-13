@@ -33,10 +33,6 @@ RUN \
 COPY resources/scripts/clean-layer.sh  /usr/bin/clean-layer.sh
 COPY resources/scripts/fix-permissions.sh  /usr/bin/fix-permissions.sh
 
-# Switch mirror to CN
-COPY resources/libraries/sources.list /etc/apt/sources.list
-#RUN  sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list 
-
 
  # Make clean-layer and fix-permissions executable
 RUN \
@@ -290,7 +286,6 @@ RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py38_${COND
 
 
     # Configure conda
-COPY resources/libraries/.condarc /root/.condarc
 RUN $CONDA_ROOT/bin/conda clean -i && \
     # Update conda
     $CONDA_ROOT/bin/conda update -y setuptools && \
@@ -1107,11 +1102,16 @@ LABEL \
 
 # Removed - is run during startup since a few env variables are dynamically changed: RUN printenv > $HOME/.ssh/environment
 
+# Switch mirror to CN
+COPY resources/libraries/sources.list /etc/apt/sources.list
+COPY resources/libraries/.condarc /root/.condarc
+# set aliyun pypi
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 # This assures we have a volume mounted even if the user forgot to do bind mount.
 # So that they do not lose their data if they delete the container.
 # TODO: VOLUME [ "/workspace" ]
 WORKDIR /workspace
-
 
 # use global option with tini to kill full process groups: https://github.com/krallin/tini#process-group-killing
 ENTRYPOINT ["/tini", "-g", "--"]
