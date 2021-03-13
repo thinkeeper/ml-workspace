@@ -13,7 +13,6 @@ annoy
 arrow
 attrs
 autograd
-autokeras
 bandit
 bayesian-optimization
 blaze
@@ -84,9 +83,6 @@ jsonpickle
 kafka-python
 kaggle
 keract
-keras-rl
-keras-tune
-keras-vis
 kmodes
 knockknock
 kornia
