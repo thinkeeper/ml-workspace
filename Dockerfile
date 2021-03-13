@@ -636,7 +636,6 @@ COPY resources/jupyter/jupyter_notebook_config.json /etc/jupyter/
 # install jupyter extensions
 RUN \
     pip install --no-cache-dir jupyter_contrib_nbextensions && \
-    pip install --no-cache-dir --upgrade --upgrade-strategy only-if-needed -r ${RESOURCES_PATH}/libraries/requirements.txt && \
     # Create empty notebook configuration
     mkdir -p $HOME/.jupyter/nbconfig/ && \
     printf "{\"load_extensions\": {}}" > $HOME/.jupyter/nbconfig/notebook.json && \
