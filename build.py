@@ -6,8 +6,8 @@ import docker
 from universal_build import build_utils
 from universal_build.helpers import build_docker
 
-REMOTE_IMAGE_PREFIX = "civc/"
-COMPONENT_NAME = "ml-workspace"
+REMOTE_IMAGE_PREFIX = "thinkeeper/"
+COMPONENT_NAME = "civc-workspace-gpu"
 FLAG_FLAVOR = "flavor"
 
 parser = argparse.ArgumentParser(add_help=False)
