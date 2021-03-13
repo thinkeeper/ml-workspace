@@ -17,7 +17,9 @@ ENV \
     DEBIAN_FRONTEND="noninteractive" \
     RESOURCES_PATH="/resources" \
     SSL_RESOURCES_PATH="/resources/ssl" \
-    WORKSPACE_HOME="/workspace"
+    WORKSPACE_HOME="/workspace" \
+    http_proxy=http://192.168.123.121:10809 \
+    https_proxy=http://192.168.123.121:10809 
 
 WORKDIR $HOME
 
@@ -31,8 +33,13 @@ RUN \
 COPY resources/scripts/clean-layer.sh  /usr/bin/clean-layer.sh
 COPY resources/scripts/fix-permissions.sh  /usr/bin/fix-permissions.sh
 
+# Switch mirror to CN
+COPY resources/libraries/sources.list /etc/apt/sources.list
+#RUN  sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list 
+
+
  # Make clean-layer and fix-permissions executable
- RUN \
+RUN \
     chmod a+rwx /usr/bin/clean-layer.sh && \
     chmod a+rwx /usr/bin/fix-permissions.sh
 
@@ -197,6 +204,8 @@ RUN \
     # Cleanup
     clean-layer.sh
 
+# set aliyun pypi
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 # Add tini
 RUN wget --no-verbose https://github.com/krallin/tini/releases/download/v0.19.0/tini -O /tini && \
     chmod +x /tini
@@ -276,17 +285,14 @@ RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py38_${COND
     /bin/bash ~/miniconda.sh -b -p $CONDA_ROOT && \
     export PATH=$CONDA_ROOT/bin:$PATH && \
     rm ~/miniconda.sh && \
+    fix-permissions.sh $CONDA_ROOT && \
+    clean-layer.sh
+
+
     # Configure conda
-    # TODO: Add conde-forge as main channel -> remove if testted
-    # TODO, use condarc file
-    $CONDA_ROOT/bin/conda config --system --add channels conda-forge && \
-    $CONDA_ROOT/bin/conda config --system --set auto_update_conda False && \
-    $CONDA_ROOT/bin/conda config --system --set show_channel_urls True && \
-    $CONDA_ROOT/bin/conda config --system --set channel_priority strict && \
-    # Deactivate pip interoperability (currently default), otherwise conda tries to uninstall pip packages
-    $CONDA_ROOT/bin/conda config --system --set pip_interop_enabled false && \
+COPY resources/libraries/.condarc /root/.condarc
+RUN $CONDA_ROOT/bin/conda clean -i && \
     # Update conda
-    $CONDA_ROOT/bin/conda update -y -n base -c defaults conda && \
     $CONDA_ROOT/bin/conda update -y setuptools && \
     $CONDA_ROOT/bin/conda install -y conda-build && \
     # Update selected packages - install python 3.8.x
@@ -610,7 +616,7 @@ RUN \
     clean-layer.sh
 
 # Install pytorch - gpu 
-# Install tensorflow 
+    # Install tensorflow 
 RUN pip install --no-cache-dir torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html && \
     pip install --no-cache-dir tensorflow-gpu==2.4.1
 
@@ -696,7 +702,7 @@ RUN \
     $lab_ext_install @jupyterlab/toc && \
     $lab_ext_install jupyterlab_tensorboard && \
     # install vim extension (only for me)
-    $lab_ext_install @axlair/jupyterlab_vim && \
+    # $lab_ext_install @axlair/jupyterlab_vim && \
     # install jupyterlab git
     $lab_ext_install @jupyterlab/git && \
     pip install jupyterlab-git && \

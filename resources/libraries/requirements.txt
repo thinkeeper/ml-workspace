@@ -42,8 +42,6 @@ dm-sonnet
 docker
 edward
 einops
-elasticsearch-dsl
-elasticseay
 eli5
 empyrical
 fairseq
