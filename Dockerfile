@@ -1078,6 +1078,7 @@ ENV KMP_DUPLICATE_LIB_OK="True" \
 
     # install vim extension (only for me)
 RUN \
+    jupyter lab build \
     $lab_ext_install @axlair/jupyterlab_vim && \
     # Final build with minimization
     jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
