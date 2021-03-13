@@ -1042,6 +1042,12 @@ RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/wh
     pip --no-cache-dir install torch-geometric
 
 
+# Switch mirror to CN
+COPY resources/libraries/sources.list /etc/apt/sources.list
+COPY resources/libraries/.condarc /root/.condarc
+# set aliyun pypi
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 # Set default values for environment variables
 ENV CONFIG_BACKUP_ENABLED="true" \
     SHUTDOWN_INACTIVE_KERNELS="false" \
