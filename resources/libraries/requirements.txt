@@ -201,7 +201,6 @@ vowpalwabbit
 websockets
 wordcloud
 xarray
-xlear
 xlrd
 xmltodict
 yapf
