@@ -1076,21 +1076,6 @@ ENV KMP_DUPLICATE_LIB_OK="True" \
     # TODO: evaluate - Deactivate hdf5 file locking
     HDF5_USE_FILE_LOCKING=False
 
-    # install vim extension (only for me)
-RUN \
-    jupyter lab build \
-    $lab_ext_install @axlair/jupyterlab_vim && \
-    # Final build with minimization
-    jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
-    jupyter lab build && \
-    # Cleanup
-    # Clean jupyter lab cache: https://github.com/jupyterlab/jupyterlab/issues/4930
-    jupyter lab clean && \
-    jlpm cache clean && \
-    # Remove build folder -> should be remove by lab clean as well?
-    rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
-    clean-layer.sh
-
 # Install pytorch - gpu 
 # Install tensorflow 
 RUN pip install --no-cache-dir torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html && \
@@ -1105,13 +1090,30 @@ RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/wh
     pip --no-cache-dir install torch-sparse -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html   && \
     pip --no-cache-dir install torch-cluster -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \ 
     pip --no-cache-dir install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH}+${CUDA}.html  && \
-    pip --no-cache-dir install torch-geometric
+    pip --no-cache-dir install torch-geometric && \
+    pip install multiprocess
 
 # Switch mirror to CN
 COPY resources/libraries/sources.list /etc/apt/sources.list
 COPY resources/libraries/.condarc /root/.condarc
 # set aliyun pypi
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# install vim extension (only for me)
+RUN \
+    jupyter lab build \
+    $lab_ext_install @axlair/jupyterlab_vim && \
+    # Final build with minimization
+    jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
+    jupyter lab build && \
+    # Cleanup
+    # Clean jupyter lab cache: https://github.com/jupyterlab/jupyterlab/issues/4930
+    jupyter lab clean && \
+    jlpm cache clean && \
+    # Remove build folder -> should be remove by lab clean as well?
+    rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
+    clean-layer.sh
+
 
 # Set default values for environment variables
 ENV CONFIG_BACKUP_ENABLED="true" \
@@ -1188,5 +1190,4 @@ CMD ["python", "/resources/docker-entrypoint.py"]
 # Port 3389 is the RDP port
 # Port 8090 is the Jupyter Notebook Server
 # See supervisor.conf for more ports
-
 EXPOSE 8080
