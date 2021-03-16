@@ -19,7 +19,7 @@ parser.add_argument(
 
 args = build_utils.parse_arguments(argument_parser=parser)
 
-VERSION = str(args.get(build_utils.FLAG_VERSION))
+VERSION = "0.0.4"
 docker_image_prefix = args.get(build_docker.FLAG_DOCKER_IMAGE_PREFIX)
 
 if not docker_image_prefix:
