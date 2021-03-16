@@ -22,8 +22,7 @@ args = build_utils.parse_arguments(argument_parser=parser)
 VERSION = "0.0.4"
 docker_image_prefix = args.get(build_docker.FLAG_DOCKER_IMAGE_PREFIX)
 
-if not docker_image_prefix:
-    docker_image_prefix = REMOTE_IMAGE_PREFIX
+docker_image_prefix = REMOTE_IMAGE_PREFIX
 
 if not args.get(FLAG_FLAVOR):
     args[FLAG_FLAVOR] = "all"
