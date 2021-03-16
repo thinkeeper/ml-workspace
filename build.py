@@ -7,7 +7,7 @@ from universal_build import build_utils
 from universal_build.helpers import build_docker
 
 REMOTE_IMAGE_PREFIX = "thinkeeper/"
-COMPONENT_NAME = "civc-workspace-gpu-vim"
+COMPONENT_NAME = "thinkeeper/civc-workspace-gpu-vim"
 FLAG_FLAVOR = "flavor"
 
 parser = argparse.ArgumentParser(add_help=False)
