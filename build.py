@@ -19,7 +19,7 @@ parser.add_argument(
 
 args = build_utils.parse_arguments(argument_parser=parser)
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 docker_image_prefix = args.get(build_docker.FLAG_DOCKER_IMAGE_PREFIX)
 
 docker_image_prefix = REMOTE_IMAGE_PREFIX
