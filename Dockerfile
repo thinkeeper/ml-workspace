@@ -1112,7 +1112,7 @@ RUN \
     clean-layer.sh
 
 # Install some packages
-RUN pip install --no-cache-dir multiprocess plotly ray hyperopt dm-tree gym
+RUN pip install --no-cache-dir multiprocess plotly ray hyperopt dm-tree gym lz4
 # set aliyun pypi
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
