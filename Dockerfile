@@ -1097,20 +1097,20 @@ RUN pip --no-cache-dir install torch-scatter -f https://pytorch-geometric.com/wh
 COPY resources/libraries/sources.list /etc/apt/sources.list
 COPY resources/libraries/.condarc /root/.condarc
 # install vim extension (only for me)
-RUN \
-    jupyter lab build && \
-    lab_ext_install='jupyter labextension install -y --debug-log-path=/dev/stdout --log-level=WARN --minimize=False --no-build' && \
-    $lab_ext_install @axlair/jupyterlab_vim && \ 
-    # Final build with minimization
-    jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
-    jupyter lab build && \
-    # Cleanup
-    # Clean jupyter lab cache: https://github.com/jupyterlab/jupyterlab/issues/4930
-    jupyter lab clean && \ 
-    jlpm cache clean && \
-    # Remove build folder -> should be remove by lab clean as well?
-    rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
-    clean-layer.sh
+#RUN \
+#    jupyter lab build && \
+#    lab_ext_install='jupyter labextension install -y --debug-log-path=/dev/stdout --log-level=WARN --minimize=False --no-build' && \
+#    $lab_ext_install @axlair/jupyterlab_vim && \ 
+#    # Final build with minimization
+#    jupyter lab build -y --debug-log-path=/dev/stdout --log-level=WARN && \
+#    jupyter lab build && \
+#    # Cleanup
+#    # Clean jupyter lab cache: https://github.com/jupyterlab/jupyterlab/issues/4930
+#    jupyter lab clean && \ 
+#    jlpm cache clean && \
+#    # Remove build folder -> should be remove by lab clean as well?
+#    rm -rf $CONDA_ROOT/share/jupyter/lab/staging && \
+#    clean-layer.sh
 
 # Install some packages
 RUN pip install --no-cache-dir multiprocess plotly ray hyperopt dm-tree gym lz4 gputil torchsummary
