@@ -6,8 +6,8 @@ import docker
 from universal_build import build_utils
 from universal_build.helpers import build_docker
 
-REMOTE_IMAGE_PREFIX = "thinkeeper/"
-COMPONENT_NAME = "thinkeeper/civc-workspace-gpu-vim"
+REMOTE_IMAGE_PREFIX = "thinkeeper"
+COMPONENT_NAME = "thinkeeper/civc-workspace-gpu"
 FLAG_FLAVOR = "flavor"
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument(
@@ -18,7 +18,7 @@ parser.add_argument(
 
 args = build_utils.parse_arguments(argument_parser=parser)
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 docker_image_prefix = args.get(build_docker.FLAG_DOCKER_IMAGE_PREFIX)
 
 docker_image_prefix = REMOTE_IMAGE_PREFIX
